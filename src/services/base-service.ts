@@ -1,8 +1,10 @@
 import type { ServerResponse } from "@/types/services";
 
+import { isNullOrUndefined } from "@/typeguards/guard-clauses.ts";
+
 class BaseService {
-	private globalHeaders: Record<string, string> = {};
 	private baseUrl: string = import.meta.env.VITE_SERVER_URL;
+	private globalHeaders: Record<string, string> = {};
 
 	async get<T>(
 		path: string,
@@ -11,6 +13,7 @@ class BaseService {
 	): Promise<ServerResponse<T>> {
 		const response = await fetch(this.buildUrl(path, queryArgs), {
 			headers: {
+				"Content-Type": "application/json",
 				...this.globalHeaders,
 				...(headers ?? {}),
 			},
@@ -56,7 +59,7 @@ class BaseService {
 		}
 
 		Object.entries(queryArgs).forEach(([key, value]) => {
-			if (!value) {
+			if (isNullOrUndefined(value)) {
 				return;
 			}
 			url.searchParams.append(key, String(value));
